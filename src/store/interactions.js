@@ -25,19 +25,17 @@ import Token from '../abis/Token.json'
 import Exchange from '../abis/Exchange.json'
 import { ETHER_ADDRESS } from '../helpers'
 
-
 export const loadWeb3 = (dispatch) => {
     const web3 = new Web3(Web3.givenProvider || 'http://localhost:7545')
     dispatch(web3Loaded(web3))
     return web3
 }
 
-
 export const loadAccount = async (web3, dispatch) => {
-    const accounts = await web3.eth.getAccounts()
-    const account = accounts[0]
-    dispatch(web3AccountLoaded(account))
-    return account
+  const accounts = await web3.eth.getAccounts()
+  const account = accounts[0]
+  dispatch(web3AccountLoaded(account))
+  return account
 }
 
 export const loadToken = async (web3, networkId, dispatch) => {
@@ -53,36 +51,35 @@ export const loadToken = async (web3, networkId, dispatch) => {
 
 export const loadExchange = async (web3, networkId, dispatch) => {
     try {
-      const exchange = web3.eth.Contract(Exchange.abi, Exchange.networks[networkId].address)
-      dispatch(exchangeLoaded(exchange))
-      return exchange
+        const exchange = web3.eth.Contract(Exchange.abi, Exchange.networks[networkId].address)
+        dispatch(exchangeLoaded(exchange))
+        return exchange
     } catch (error) {
-      console.log('Contract not deployed to the current network. Please select another network with Metamask.')
-      return null
+        console.log('Contract not deployed to the current network. Please select another network with Metamask.')
+        return null
     }
 }
 
-
 export const loadAllOrders = async (exchange, dispatch) => {
-    //Fetch cancelled orderds with the "Cancel" event stream
-    const cancelStream = await exchange.getPastEvents('Cancel', { fromBlock: 0, toBlock: 'latest'}) // This will look at the entire blockchain for these events
+    // Fetch cancelled orders with the "Cancel" event stream
+    const cancelStream = await exchange.getPastEvents('Cancel', { fromBlock: 0, toBlock: 'latest' })
     // Format cancelled orders
     const cancelledOrders = cancelStream.map((event) => event.returnValues)
     // Add cancelled orders to the redux store
     dispatch(cancelledOrdersLoaded(cancelledOrders))
 
-    //Fetch filled orderds with the "Trade" event stream
-    const tradeStream = await exchange.getPastEvents('Trade', { fromBlock: 0, toBlock: 'latest'})
+    // Fetch filled orders with the "Trade" event stream
+    const tradeStream = await exchange.getPastEvents('Trade', { fromBlock: 0, toBlock: 'latest' })
     // Format filled orders
     const filledOrders = tradeStream.map((event) => event.returnValues)
     // Add cancelled orders to the redux store
     dispatch(filledOrdersLoaded(filledOrders))
-    
+
     // Load order stream
-    const orderStream = await exchange.getPastEvents('Order', { fromBlock: 0, toBlock: 'latest'})
-    // Format filled orders
+    const orderStream = await exchange.getPastEvents('Order', { fromBlock: 0,  toBlock: 'latest' })
+    // Format order stream
     const allOrders = orderStream.map((event) => event.returnValues)
-    // Add cancelled orders to the redux store
+    // Add open orders to the redux store
     dispatch(allOrdersLoaded(allOrders))
 }
 
@@ -90,27 +87,24 @@ export const subscribeToEvents = async (exchange, dispatch) => {
     exchange.events.Cancel({}, (error, event) => {
         dispatch(orderCancelled(event.returnValues))
     })
-    
+
     exchange.events.Trade({}, (error, event) => {
         dispatch(orderFilled(event.returnValues))
     })
-    
+
     exchange.events.Deposit({}, (error, event) => {
         dispatch(balancesLoaded())
     })
-    
+
     exchange.events.Withdraw({}, (error, event) => {
         dispatch(balancesLoaded())
     })
-    
+
     exchange.events.Order({}, (error, event) => {
         dispatch(orderMade(event.returnValues))
     })
 }
 
-
-
-// Importanct stuff to learn about in cancel orders video 3min in. Writing on the blockchain
 export const cancelOrder = (dispatch, exchange, order, account) => {
     exchange.methods.cancelOrder(order.id).send({ from: account })
     .on('transactionHash', (hash) => {
@@ -152,56 +146,54 @@ export const loadBalances = async (dispatch, web3, exchange, token, account) => 
 
     // Trigger all balances loaded
     dispatch(balancesLoaded())
-
-    console.log('account', account)
 }
 
 export const depositEther = (dispatch, exchange, web3, amount, account) => {
     exchange.methods.depositEther.send({ from: account,  value: web3.utils.toWei(amount, 'ether') })
     .on('transactionHash', (hash) => {
-      dispatch(balancesLoading())
+        dispatch(balancesLoading())
     })
     .on('error',(error) => {
-      console.error(error)
-      window.alert(`There was an error!`)
+        console.error(error)
+        window.alert(`There was an error!`)
     })
 }
-  
+
 export const withdrawEther = (dispatch, exchange, web3, amount, account) => {
     exchange.methods.withdrawEther(web3.utils.toWei(amount, 'ether')).send({ from: account })
     .on('transactionHash', (hash) => {
-      dispatch(balancesLoading())
+        dispatch(balancesLoading())
     })
     .on('error',(error) => {
-      console.error(error)
-      window.alert(`There was an error!`)
-    })
-}
-  
-export const depositToken = (dispatch, exchange, web3, token, amount, account) => {
-    amount = web3.utils.toWei(amount, 'ether')
-  
-    token.methods.approve(exchange.options.address, amount).send({ from: account })
-    .on('transactionHash', (hash) => {
-      exchange.methods.depositToken(token.options.address, amount).send({ from: account })
-      .on('transactionHash', (hash) => {
-        dispatch(balancesLoading())
-      })
-      .on('error',(error) => {
         console.error(error)
         window.alert(`There was an error!`)
-      })
     })
 }
-  
+
+export const depositToken = (dispatch, exchange, web3, token, amount, account) => {
+    amount = web3.utils.toWei(amount, 'ether')
+
+    token.methods.approve(exchange.options.address, amount).send({ from: account })
+    .on('transactionHash', (hash) => {
+        exchange.methods.depositToken(token.options.address, amount).send({ from: account })
+        .on('transactionHash', (hash) => {
+        dispatch(balancesLoading())
+        })
+        .on('error',(error) => {
+        console.error(error)
+        window.alert(`There was an error!`)
+        })
+    })
+}
+
 export const withdrawToken = (dispatch, exchange, web3, token, amount, account) => {
     exchange.methods.withdrawToken(token.options.address, web3.utils.toWei(amount, 'ether')).send({ from: account })
     .on('transactionHash', (hash) => {
-      dispatch(balancesLoading())
+        dispatch(balancesLoading())
     })
     .on('error',(error) => {
-      console.error(error)
-      window.alert(`There was an error!`)
+        console.error(error)
+        window.alert(`There was an error!`)
     })
 }
 
@@ -221,44 +213,18 @@ export const makeBuyOrder = (dispatch, exchange, token, web3, order, account) =>
     })
 }
 
-
 export const makeSellOrder = (dispatch, exchange, token, web3, order, account) => {
     const tokenGet = ETHER_ADDRESS
     const amountGet = web3.utils.toWei((order.amount * order.price).toString(), 'ether')
     const tokenGive = token.options.address
     const amountGive = web3.utils.toWei(order.amount, 'ether')
-  
+
     exchange.methods.makeOrder(tokenGet, amountGet, tokenGive, amountGive).send({ from: account })
     .on('transactionHash', (hash) => {
-      dispatch(sellOrderMaking())
+        dispatch(sellOrderMaking())
     })
     .on('error',(error) => {
-      console.error(error)
-      window.alert(`There was an error!`)
+        console.error(error)
+        window.alert(`There was an error!`)
     })
 }
-
-
-
-
-
-
-
-  
-// export const loadWeb3 = async (dispatch) => {
-//     let web3
-//     if (window.ethereum) {
-//       web3 = new Web3(window.ethereum)
-//       await window.ethereum.enable()
-//     }
-//     else if (window.web3) {
-//       web3 = new Web3(window.web3.currentProvider)
-//     }
-//     else {
-//       // Do nothing....
-//     }
-//     dispatch(web3Loaded(web3))
-//     return web3
-//   }
-
-// when using above code in app.js needs to have const web3 = await loadWeb3(dispatch)

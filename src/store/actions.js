@@ -84,7 +84,7 @@ export function etherBalanceLoaded(balance) {
         type: 'ETHER_BALANCE_LOADED',
         balance
     }
-  }
+}
   
 export function tokenBalanceLoaded(balance) {
     return {
