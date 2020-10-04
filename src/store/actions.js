@@ -2,14 +2,14 @@
 export function web3Loaded(connection) {
     return {
         type: 'WEB3_LOADED',
-        connection 
+        connection
     }
 }
 
 export function web3AccountLoaded(account) {
     return {
         type: 'WEB3_ACCOUNT_LOADED',
-        account 
+        account
     }
 }
 
@@ -17,7 +17,7 @@ export function web3AccountLoaded(account) {
 export function tokenLoaded(contract) {
     return {
         type: 'TOKEN_LOADED',
-        contract 
+        contract
     }
 }
 
@@ -25,28 +25,28 @@ export function tokenLoaded(contract) {
 export function exchangeLoaded(contract) {
     return {
         type: 'EXCHANGE_LOADED',
-        contract 
+        contract
     }
 }
 
 export function cancelledOrdersLoaded(cancelledOrders) {
     return {
         type: 'CANCELLED_ORDERS_LOADED',
-        cancelledOrders 
+        cancelledOrders
     }
 }
 
 export function filledOrdersLoaded(filledOrders) {
     return {
         type: 'FILLED_ORDERS_LOADED',
-        filledOrders 
+        filledOrders
     }
 }
 
 export function allOrdersLoaded(allOrders) {
     return {
         type: 'ALL_ORDERS_LOADED',
-        allOrders 
+        allOrders
     }
 }
 
@@ -85,7 +85,7 @@ export function etherBalanceLoaded(balance) {
         balance
     }
 }
-  
+
 export function tokenBalanceLoaded(balance) {
     return {
         type: 'TOKEN_BALANCE_LOADED',
@@ -154,20 +154,20 @@ export function buyOrderAmountChanged(amount) {
         amount
     }
 }
-  
+
 export function buyOrderPriceChanged(price) {
     return {
         type: 'BUY_ORDER_PRICE_CHANGED',
         price
     }
 }
-  
+
 export function buyOrderMaking(price) {
     return {
         type: 'BUY_ORDER_MAKING'
     }
 }
-  
+
 // Generic Order
 export function orderMade(order) {
     return {
@@ -175,7 +175,7 @@ export function orderMade(order) {
         order
     }
 }
-  
+
 // Sell Order
 export function sellOrderAmountChanged(amount) {
     return {
@@ -183,14 +183,14 @@ export function sellOrderAmountChanged(amount) {
         amount
     }
 }
-  
+
 export function sellOrderPriceChanged(price) {
     return {
         type: 'SELL_ORDER_PRICE_CHANGED',
         price
     }
 }
-  
+
 export function sellOrderMaking(price) {
     return {
         type: 'SELL_ORDER_MAKING'
