@@ -25,18 +25,47 @@ import Token from '../abis/Token.json'
 import Exchange from '../abis/Exchange.json'
 import { ETHER_ADDRESS } from '../helpers'
 
+// export const loadWeb3 = dispatch => {
+//   if (typeof window.ethereum !== 'undefined' || (typeof window.web3 !== 'undefined')) {
+//     const web3 = new Web3(window.web3.currentProvider || 'http://localhost:7545')
+//     dispatch(web3Loaded(web3))
+//     return web3
+// } else {
+//     window.alert('In order to view DAPP add MetaMask extension to your browser')
+//     const mmWebsite = "https://metamask.io/"
+//     window.location.assign(mmWebsite)
+//   }
+// }
+
+// export const loadAccount = async (web3, dispatch) => {
+//   await window.ethereum.request({ method: 'eth_requestAccounts' })
+//   // await window.eth_requestAccounts
+//   const accounts = await new web3.eth.getAccounts()
+//   const account = await accounts[0]
+//   if(typeof account !== 'undefined'){
+//     dispatch(web3AccountLoaded(account))
+//     return account
+//   } else {
+//     window.alert('account is undefined')
+//   }
+// }
+
 export const loadWeb3 = (dispatch) => {
   const web3 = new Web3(Web3.givenProvider || 'http://localhost:7545')
   dispatch(web3Loaded(web3))
   return web3
 }
 
+
+
 export const loadAccount = async (web3, dispatch) => {
-  const accounts = await web3.eth.getAccounts()
+  const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+  // await web3.eth.getAccounts()
   const account = accounts[0]
   dispatch(web3AccountLoaded(account))
   return account
 }
+
 
 export const loadToken = async (web3, networkId, dispatch) => {
   try {
@@ -149,7 +178,7 @@ export const loadBalances = async (dispatch, web3, exchange, token, account) => 
 }
 
 export const depositEther = (dispatch, exchange, web3, amount, account) => {
-  exchange.methods.depositEther().send({ from: account,  value: web3.utils.toWei(amount, 'ether') })
+  exchange.methods.depositEther.send({ from: account,  value: web3.utils.toWei(amount, 'ether') })
   .on('transactionHash', (hash) => {
     dispatch(balancesLoading())
   })
